@@ -39,6 +39,11 @@ app.get('/health', (req, res) => {
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.static(__dirname));
 
+// Explicit root route so visiting the server URL directly always serves index.html
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'index.html'));
+});
+
 // Helper for LuaProt requests
 async function callLuaProt(endpoint, options = {}) {
   if (!LUAPROT_API_KEY) {
@@ -266,6 +271,14 @@ app.post('/api/reset-hwid', async (req, res) => {
       error: error.message
     });
   }
+});
+
+// Catch-all route to serve index.html for any frontend navigation
+app.get('*', (req, res, next) => {
+  if (req.path.startsWith('/api')) {
+    return next();
+  }
+  res.sendFile(path.join(__dirname, 'index.html'));
 });
 
 app.listen(PORT, () => {
