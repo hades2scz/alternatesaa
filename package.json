@@ -4,6 +4,7 @@
   "description": "LuaProt Key Validator, Dashboard, and Shop with Grid layout and Black/White Gradient",
   "main": "server.js",
   "scripts": {
+    "build": "echo 'Build complete'",
     "start": "node server.js",
     "dev": "node server.js"
   },
