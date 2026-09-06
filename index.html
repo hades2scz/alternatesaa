@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LuaProt Hub Gateway</title>
+  <meta name="description" content="Secure key validation, hub dashboard and script licensing powered by LuaProt" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <!-- Grid Background & Gradients -->
+  <div class="grid-background" id="gridBg"></div>
+  <div class="gradient-glow top-glow"></div>
+  <div class="gradient-glow bottom-glow"></div>
+
+  <div class="app-shell">
+    <!-- Main Content Container with Tabs -->
+    <main class="main-content">
+
+      <!-- TAB 1: DASHBOARD (LOGIN / LOCKED BY DEFAULT, UNLOCKED ON KEY AUTH) -->
+      <section class="tab-pane active" id="pane-dashboard">
+        <div class="content-container">
+
+          <!-- 1A: LOCKED / LOGIN VIEW (Default) -->
+          <div class="dash-locked-view" id="dashLockedView">
+            <div class="key-center-container">
+              <div class="hero-badge">
+                <span class="badge-dot"></span>
+                <span>PROTECTED WITH LUAPROT</span>
+              </div>
+
+              <h1 class="hero-heading">enter your key:</h1>
+              <p class="hero-subtitle">Enter your personal access license to authenticate and unlock your dashboard</p>
+
+              <!-- Key Input Box -->
+              <form class="key-form" id="keyForm" onsubmit="return false;">
+                <div class="input-wrapper">
+                  <span class="input-icon">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M21 2l-2 2m-1-1l-3 3m5 0l-3-3m-3 3l-2 2m-1-1l-3 3m5 0l-3-3M3 21l9-9m0 0a5 5 0 1 0-7-7 5 5 0 0 0 7 7z"/>
+                    </svg>
+                  </span>
+
+                  <input 
+                    type="text" 
+                    id="keyInput" 
+                    class="key-input" 
+                    placeholder="LP-XXXX-XXXX-XXXX" 
+                    autocomplete="off" 
+                    spellcheck="false"
+                  />
+
+                  <button type="button" class="action-btn" id="pasteBtn" title="Paste from clipboard">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/>
+                      <rect x="8" y="2" width="8" height="4" rx="1" ry="1"/>
+                    </svg>
+                  </button>
+
+                  <button type="button" class="action-btn hidden" id="clearBtn" title="Clear key">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <line x1="18" y1="6" x2="6" y2="18"/>
+                      <line x1="6" y1="6" x2="18" y2="18"/>
+                    </svg>
+                  </button>
+                </div>
+
+                <button type="submit" class="submit-key-btn" id="submitKeyBtn">
+                  <span class="btn-text">Authenticate Key</span>
+                  <span class="btn-spinner hidden" id="btnSpinner"></span>
+                  <span class="btn-icon">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                      <line x1="5" y1="12" x2="19" y2="12"/>
+                      <polyline points="12 5 19 12 12 19"/>
+                    </svg>
+                  </span>
+                </button>
+              </form>
+
+              <!-- Status Message Area -->
+              <div class="feedback-msg hidden" id="feedbackMsg"></div>
+            </div>
+          </div>
+
+          <!-- 1B: UNLOCKED DASHBOARD VIEW (Shown once key is authenticated) -->
+          <div class="dash-unlocked-view hidden" id="dashUnlockedView">
+            <div class="section-header">
+              <div class="header-left">
+                <span class="section-tag">AUTHENTICATED ACCESS</span>
+                <h2 class="section-title">LuaProt Hub Dashboard</h2>
+                <p class="section-desc">Manage your key license, hardware resets, and script execution loader.</p>
+              </div>
+              <button class="lock-out-btn" id="lockDashboardBtn" title="Log Out & Lock">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                  <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                </svg>
+                <span>Log Out</span>
+              </button>
+            </div>
+
+            <!-- DASHBOARD GRID: 4 MAIN SECTIONS (Loadstring, Key Info, Reset HWID, Hub Info) -->
+            <div class="dash-interactive-grid">
+
+              <!-- 1. LOADSTRING CARD (Top Feature) -->
+              <div class="dash-card loadstring-card">
+                <div class="dash-card-header">
+                  <div class="dash-card-title-group">
+                    <span class="card-mini-icon">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="16 18 22 12 16 6"/>
+                        <polyline points="8 6 2 12 8 18"/>
+                      </svg>
+                    </span>
+                    <h3>Script Loadstring</h3>
+                  </div>
+                  <span class="tag-status">Ready to Execute</span>
+                </div>
+
+                <p class="dash-card-desc">Execute this loader snippet in your Lua executor. Your key is automatically embedded.</p>
+
+                <div class="code-box-wrapper">
+                  <pre class="code-box"><code id="loadstringCode">loadstring(game:HttpGet("https://luaprot.net/api/v1/scripts/load?key=..."))()</code></pre>
+                  <button class="copy-code-btn" id="copyLoadstringBtn">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+                      <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+                    </svg>
+                    <span>Copy Loadstring</span>
+                  </button>
+                </div>
+              </div>
+
+              <!-- 2. KEY INFO CARD -->
+              <div class="dash-card key-info-card">
+                <div class="dash-card-header">
+                  <div class="dash-card-title-group">
+                    <span class="card-mini-icon">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="7.5" cy="15.5" r="5.5"/>
+                        <path d="M11.5 11.5L22 1l-3 3 2 2-2 2 2 2-3.5 3.5"/>
+                      </svg>
+                    </span>
+                    <h3>Key Info</h3>
+                  </div>
+                  <span class="key-status-badge" id="dashKeyBadge">ACTIVE</span>
+                </div>
+
+                <div class="detail-rows">
+                  <div class="detail-row">
+                    <span class="d-label">Active Key</span>
+                    <span class="d-val monospace" id="dashKeyVal">...</span>
+                  </div>
+                  <div class="detail-row">
+                    <span class="d-label">Expiration</span>
+                    <span class="d-val" id="dashKeyExpire">30 Days remaining</span>
+                  </div>
+                  <div class="detail-row">
+                    <span class="d-label">Execution Count</span>
+                    <span class="d-val" id="dashKeyExecs">0 runs</span>
+                  </div>
+                  <div class="detail-row">
+                    <span class="d-label">Hardware Lock</span>
+                    <span class="d-val monospace" id="dashKeyHwid">Bound</span>
+                  </div>
+                  <div class="detail-row">
+                    <span class="d-label">Linked Discord</span>
+                    <span class="d-val" id="dashKeyDiscord">Not Linked</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 3. RESET HWID CARD -->
+              <div class="dash-card hwid-card">
+                <div class="dash-card-header">
+                  <div class="dash-card-title-group">
+                    <span class="card-mini-icon">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/>
+                      </svg>
+                    </span>
+                    <h3>Reset HWID</h3>
+                  </div>
+                  <span class="cooldown-pill" id="hwidCooldownPill">Reset Available</span>
+                </div>
+
+                <p class="dash-card-desc">Transfer or reset your hardware identifier binding to allow execution on a new machine.</p>
+
+                <div class="hwid-action-box">
+                  <div class="hwid-status-text">
+                    <span class="hwid-bound-label">Current HWID:</span>
+                    <span class="hwid-bound-value monospace" id="dashHwidBoundValue">HWID-LOCKED</span>
+                  </div>
+                  <button class="reset-action-btn" id="dashResetHwidBtn">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/>
+                    </svg>
+                    <span>Reset Hardware ID</span>
+                  </button>
+                </div>
+                <div class="feedback-msg hidden" id="dashHwidMsg"></div>
+              </div>
+
+              <!-- 4. HUB INFO CARD -->
+              <div class="dash-card hub-info-card">
+                <div class="dash-card-header">
+                  <div class="dash-card-title-group">
+                    <span class="card-mini-icon">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"/>
+                        <line x1="2" y1="12" x2="22" y2="12"/>
+                      </svg>
+                    </span>
+                    <h3>Hub Info</h3>
+                  </div>
+                  <button class="refresh-btn" id="dashRefreshHubBtn">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/>
+                    </svg>
+                    <span>Refresh</span>
+                  </button>
+                </div>
+
+                <div class="detail-rows">
+                  <div class="detail-row">
+                    <span class="d-label">Hub Name</span>
+                    <span class="d-val" id="dashHubName">Apex Hub</span>
+                  </div>
+                  <div class="detail-row">
+                    <span class="d-label">Hub ID</span>
+                    <span class="d-val monospace" id="dashHubId">40511091490620200512</span>
+                  </div>
+                  <div class="detail-row">
+                    <span class="d-label">Security Protocol</span>
+                    <span class="d-val">LuaProt v1 (Active)</span>
+                  </div>
+                </div>
+
+                <div class="scripts-sub-block">
+                  <span class="sub-block-title">Permitted Scripts</span>
+                  <div class="scripts-dash-list" id="dashScriptsList">
+                    <div class="dash-script-item">
+                      <span class="s-name">Main Executive Script</span>
+                      <span class="s-badge">v4.0</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- TAB 2: SHOP PANE -->
+      <section class="tab-pane" id="pane-shop">
+        <div class="content-container">
+          <div class="section-header">
+            <span class="section-tag">STORE & LICENSING</span>
+            <h2 class="section-title">Official Store</h2>
+            <p class="section-desc">Get instant access keys, renewals, and upgrades directly from our official store.</p>
+          </div>
+
+          <!-- PROMINENT GO TO SHOP CARD -->
+          <div class="shop-hero-card">
+            <div class="shop-badge">OFFICIAL STORE</div>
+            <h3 class="shop-title">Need a License Key or Extension?</h3>
+            <p class="shop-subtitle">Visit our official store to purchase instant access passes, premium scripts, and automatic key delivery.</p>
+
+            <a href="https://alternate.mykomerza.com/" target="_blank" rel="noopener noreferrer" class="shop-main-btn" id="goToShopBtn">
+              <span>Go to Shop</span>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
+                <polyline points="15 3 21 3 21 9"/>
+                <line x1="10" y1="14" x2="21" y2="3"/>
+              </svg>
+            </a>
+
+            <div class="shop-features-list">
+              <div class="shop-feat-item">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 14 14"/></svg>
+                <span>Instant Automatic Key Delivery</span>
+              </div>
+              <div class="shop-feat-item">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                <span>LuaProt Protected Keys</span>
+              </div>
+              <div class="shop-feat-item">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                <span>24/7 Dedicated Support</span>
+              </div>
+            </div>
+
+            <span class="shop-url-footnote">Store link: <a href="https://alternate.mykomerza.com/" target="_blank" rel="noopener">https://alternate.mykomerza.com/</a></span>
+          </div>
+
+        </div>
+      </section>
+
+    </main>
+
+    <!-- FLOATING BOTTOM DOCK WITH 2 ROUNDED TABS (DASHBOARD & SHOP) -->
+    <nav class="bottom-dock-container">
+      <div class="bottom-dock" id="bottomDock">
+        <div class="dock-indicator" id="dockIndicator"></div>
+        
+        <!-- Tab: Dashboard (Login / Overview) -->
+        <button type="button" class="dock-tab active" data-tab="dashboard" id="tabDashboard">
+          <span class="tab-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="3" width="7" height="7"/>
+              <rect x="14" y="3" width="7" height="7"/>
+              <rect x="14" y="14" width="7" height="7"/>
+              <rect x="3" y="14" width="7" height="7"/>
+            </svg>
+          </span>
+          <span class="tab-label">Dashboard</span>
+        </button>
+
+        <!-- Tab: Shop -->
+        <button type="button" class="dock-tab" data-tab="shop" id="tabShop">
+          <span class="tab-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/>
+              <line x1="3" y1="6" x2="21" y2="6"/>
+              <path d="M16 10a4 4 0 0 1-8 0"/>
+            </svg>
+          </span>
+          <span class="tab-label">Shop</span>
+        </button>
+      </div>
+    </nav>
+
+  </div>
+
+  <script src="config.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
