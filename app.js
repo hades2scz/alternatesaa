@@ -46,6 +46,41 @@ document.addEventListener('DOMContentLoaded', () => {
   let activeKeyData = null;
 
   // -----------------------------------------------------------------
+  // 0. DYNAMIC TYPEWRITER TAB TITLE (Alternate -> 25% SALE)
+  // -----------------------------------------------------------------
+  const baseTitle = "Alternate";
+  const saleSuffix = " - 25% SALE";
+  const fullTitle = baseTitle + saleSuffix;
+  let charIdx = baseTitle.length;
+  let isBackspacing = false;
+
+  function runTitleTypewriter() {
+    if (!isBackspacing) {
+      if (charIdx < fullTitle.length) {
+        charIdx++;
+        document.title = fullTitle.slice(0, charIdx);
+        setTimeout(runTitleTypewriter, 140);
+      } else {
+        // Hold full title "Alternate - 25% SALE"
+        isBackspacing = true;
+        setTimeout(runTitleTypewriter, 2400);
+      }
+    } else {
+      if (charIdx > baseTitle.length) {
+        charIdx--;
+        document.title = fullTitle.slice(0, charIdx);
+        setTimeout(runTitleTypewriter, 80);
+      } else {
+        // Hold "Alternate"
+        isBackspacing = false;
+        setTimeout(runTitleTypewriter, 1800);
+      }
+    }
+  }
+
+  setTimeout(runTitleTypewriter, 500);
+
+  // -----------------------------------------------------------------
   // 1. DOCK & TAB NAVIGATION (DASHBOARD & SHOP)
   // -----------------------------------------------------------------
   function updateDockIndicator(targetTab) {

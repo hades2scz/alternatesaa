@@ -39,6 +39,27 @@ app.get('/health', (req, res) => {
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.static(__dirname));
 
+// Explicit static asset routes with proper MIME types
+app.get('/style.css', (req, res) => {
+  res.type('text/css');
+  res.sendFile(path.join(__dirname, 'style.css'));
+});
+
+app.get('/app.js', (req, res) => {
+  res.type('application/javascript');
+  res.sendFile(path.join(__dirname, 'app.js'));
+});
+
+app.get('/config.js', (req, res) => {
+  res.type('application/javascript');
+  res.sendFile(path.join(__dirname, 'config.js'));
+});
+
+app.get('/logo.png', (req, res) => {
+  res.type('image/png');
+  res.sendFile(path.join(__dirname, 'logo.png'));
+});
+
 // Explicit root route so visiting the server URL directly always serves index.html
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'index.html'));
